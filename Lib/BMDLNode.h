@@ -101,6 +101,11 @@ BMStatus_t BMDLNode_SGet(BMDLNode_pt *ppnode);
 \brief Return a node into the static pool.
 */
 BMStatus_t BMDLNode_SReturn(BMDLNode_pt node);
+
+/*!
+\brief Count nodes in the static pool.
+*/
+uint16_t BMDLNode_CountSPool();
 #pragma endregion STATIC_POOL_METHODS
 
 #pragma region MULTI_DIMENSIONAL_LIST

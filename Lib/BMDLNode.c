@@ -10,10 +10,10 @@ BMStatus_t BMDLNode_Count(BMDLNode_pt anchor, uint16_t* count)
         {
             break;
         }
-        *count = 0;
+        (*count) = 0;
         for (BMDLNode_pt iter = anchor->next; iter != anchor; iter = iter->next)
         {
-            *count++;
+            (*count)++;
         }
     } while (0);
     status = BMLock_UNLOCK((BMLock_pt)anchor);
@@ -48,11 +48,6 @@ BMStatus_t BMDLNode_AddPrev(BMDLNode_pt anchor, BMDLNode_pt newnode)
     BMStatus_t status = BMStatus_SUCCESS;
     do {
         if ((status = BMLock_LOCK((BMLock_pt)anchor)) != BMStatus_SUCCESS)
-        {
-            break;
-        }
-        if ((status = BMLock_LOCK((BMLock_pt)newnode))
-            != BMStatus_SUCCESS)
         {
             break;
         }
@@ -180,6 +175,8 @@ int BMDLNode_DefaultMatch(const void* pv0, const void* pv1)
     #endif
 }
 
+#define BMDLNode_FIND(_anchor, _tofind, _ppfound) \
+    BMDLNode_Find(_anchor, _tofind, BMDLNode_DefaultMatch, _ppfound)
 #pragma endregion NODE_FINDER
 
 #pragma region STATIC_POOL_METHODS
@@ -250,6 +247,13 @@ BMStatus_t BMDLNode_SReturn(BMDLNode_pt node)
         status = BMDLNode_AddNext(&spool, node);
     } while (0);
     return status;
+}
+
+uint16_t BMDLNode_CountSPool()
+{
+    uint16_t count = 0;
+    BMDLNode_Count(&spool, &count);
+    return count;
 }
 #pragma endregion STATIC_POOL_METHODS
 

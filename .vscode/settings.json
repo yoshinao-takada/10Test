@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "bmdlnode.h": "c",
+        "bmtest.h": "c"
+    }
+}
