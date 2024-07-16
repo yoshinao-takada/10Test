@@ -5,8 +5,7 @@
 
 typedef struct BMFSM {
     BMDLNode_t base; // lockable input queue
-    BMDLNode_pt outqs; // output queues.
-    int outqsSize;
+    BMDLNode_t outqs; // output queues.
 
     // event handler
     BMStatus_t (*handler)(struct BMFSM* fsm, BMEv_pt ev);
@@ -14,6 +13,11 @@ typedef struct BMFSM {
 
     void* ctx; // context
 } BMFSM_t, *BMFSM_pt;
+
+#define BMFSM_INIOBJ(_varname, _handler, _laststatus, _ctx) { \
+    BMDLNode_INIOBJ(_varname.base, NULL), \
+    BMDLNode_INIOBJ(_varname.outqs, NULL), \
+    _handler, _Laststatus, _ctx }
 
 /*!
 \brief Enqueue an event.

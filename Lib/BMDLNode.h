@@ -11,8 +11,8 @@ typedef struct BMDLNode {
     void* data;
 } BMDLNode_t, *BMDLNode_pt;
 
-#define BMDLNode_INIOBJ(_varname, _data) { BMObj_INIOBJ, \
-    &(_varname), &(_varname), _data }
+#define BMDLNode_INIOBJ(_varname, _data) { \
+    BMObj_INIOBJEX(BMDLNode_TYPEID), &(_varname), &(_varname), _data }
 
 #define BMDLNode_INIT(_varptr) BMObj_INIT(&(_varptr)->base)
 
@@ -59,6 +59,11 @@ BMStatus_t BMDLNode_GetPrev(BMDLNode_pt anchor, BMDLNode_pt *ppnode);
 \brief Remove the node matching to toRemove.
 */
 BMStatus_t BMDLNode_Remove(BMDLNode_pt anchor, BMDLNode_pt toRemove);
+
+/*!
+\brief Remove all the nodes and return them to the static pool.
+*/
+void BMDLNode_Clean(BMDLNode_pt anchor);
 #pragma endregion CORE_METHODS
 
 #pragma region NODE_FINDER
@@ -112,6 +117,17 @@ uint16_t BMDLNode_CountSPool();
 /*!
 \brief Add a list to a multi-dimensional list.
 */
-BMStatus_t BMMDList_Add(BMDLNode_pt list, BMDLNode_pt toAdd);
+BMStatus_t BMDLNode_AddSubanchor(BMDLNode_pt list, BMDLNode_pt toAdd);
+
+/*!
+\brief Peek an anchor of a sublist selected by index.
+*/
+BMStatus_t BMDLNode_PeekList(BMDLNode_pt list, uint16_t index,
+    BMDLNode_pt *toPeek);
+
+/*!
+\brief Remove all the nodes and lists and return them to the static pool.
+*/
+void BMDLNode_CleanList(BMDLNode_pt anchor);
 #pragma endregion MULTI_DIMENSIONAL_LIST
 #endif /* BMDLNODE_H */

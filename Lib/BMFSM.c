@@ -25,13 +25,14 @@ BMStatus_t BMFSM_Crunch(BMFSM_pt fsm)
 BMStatus_t BMFSM_EnQOut(BMFSM_pt fsm, int qindex, BMEv_pt ev)
 {
     BMStatus_t status = BMStatus_SUCCESS;
+    BMDLNode_pt outq = NULL;
     do {
-        if (qindex >= fsm->outqsSize)
-        { // out of range
-            status = BMStatus_RANGE;
+        if ((status = BMDLNode_PeekList(&fsm->outqs, qindex, &outq))
+            != BMStatus_SUCCESS)
+        {
             break;
         }
-        status = BMEvQList_EnQ(fsm->outqs + qindex, ev);
+        status = BMEvQ_EnQ(outq, ev);
     } while (0);
     return status;
 }

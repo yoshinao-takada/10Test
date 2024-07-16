@@ -5,6 +5,7 @@
 BMStatus_t BMDLNode_SPoolUT();
 BMStatus_t BMDLNode_AddGetPrevNext();
 BMStatus_t BMDLNode_NodeFinderUT();
+BMStatus_t BMDLNode_AddSubanchorUT();
 
 
 BMStatus_t BMDLNodeUT()
@@ -22,6 +23,10 @@ BMStatus_t BMDLNodeUT()
         if ((status = BMDLNode_NodeFinderUT()) != BMStatus_SUCCESS)
         {
             BMTest_ERRLOGBREAKEX("Fail in BMDLNode_NodeFinderUT()");
+        }
+        if ((status = BMDLNode_AddSubanchorUT()) != BMStatus_SUCCESS)
+        {
+            BMTest_ERRLOGBREAKEX("Fail in BMDLNode_AddSubanchorUT()");
         }
     } while (0);
     BMTest_ENDFUNC(status);
@@ -211,6 +216,87 @@ BMStatus_t BMDLNode_NodeFinderUT()
         }
         GetReturnNodes(nodes, BMArray_SIZE(nodes), 0);
     } while (0);
+    BMTest_ENDFUNC(status);
+    return status;
+}
+
+BMStatus_t BMDLNode_AddSubanchorUT()
+{
+    const int LISTCOUNT = 4;
+    BMStatus_t status = BMStatus_SUCCESS;
+    BMDLNode_t anchor = BMDLNode_INIOBJ(anchor, NULL);
+    BMDLNode_INIT(&anchor);
+    printf("Count SPool = %u/%d @ %d\n", 
+        BMDLNode_CountSPool(), BMDLNode_POOLSIZE, __LINE__);
+    do {
+        // register subanchors
+        for (int i = 0; i < LISTCOUNT; i++)
+        {
+            BMDLNode_pt newList = NULL;
+            status = BMDLNode_SGet(&newList);
+            if (status != BMStatus_SUCCESS)
+            {
+                BMTest_ERRLOGBREAKEX("Fail in BMDLNode_SGet()");
+            }
+            BMDLNode_INIT(newList);
+            status = BMDLNode_AddSubanchor(&anchor, newList);
+        }
+        if (status) break;
+        printf("Count SPool = %u/%d @ %d\n", 
+            BMDLNode_CountSPool(), BMDLNode_POOLSIZE, __LINE__);
+        // register nodes under subanchors
+        for (int i = 0; i < LISTCOUNT; i++)
+        {
+            BMDLNode_pt list;
+            status = BMDLNode_PeekList(&anchor, (uint16_t)i, &list);
+            if (status)
+            {
+                BMTest_ERRLOGBREAKEX("Fail in BMDLNode_PeekList()");
+            }
+            for (int j = 0; j <= i; j++)
+            {
+                BMDLNode_pt newnode = NULL;
+                if ((status = BMDLNode_SGet(&newnode)) != BMStatus_SUCCESS)
+                {
+                    BMTest_ERRLOGBREAKEX("Fail in BMDLNode_SGet()");
+                }
+                if ((status = BMDLNode_AddPrev(list, newnode)) != BMStatus_SUCCESS)
+                {
+                    BMTest_ERRLOGBREAKEX("Fail in BMDLNode_AddSubanchor()");
+                }
+            }
+            if (status) break;
+        }
+        if (status) break;
+        // count nodes under subanchors
+        BMDLNode_pt node = anchor.next;
+        for (int i = 0; i < LISTCOUNT; i++)
+        {
+            uint16_t count = 0;
+            BMDLNode_pt subanchor;
+            if ((status = BMDLNode_PeekList(&anchor, i, &subanchor))
+                != BMStatus_SUCCESS)
+            {
+                BMTest_ERRLOGBREAKEX("Fail in BMDLNode_PeekList()")
+            }
+            if ((void*)subanchor != node->data)
+            {
+                BMTest_ERRLOGBREAKEX("Pointer mismatch");
+            }
+            if ((status != BMDLNode_Count(subanchor, &count)))
+            {
+                BMTest_ERRLOGBREAKEX("Fail in BMDLNode_Count()");
+            }
+            if (count != (i + 1))
+            {
+                BMTest_ERRLOGBREAKEX("(count != (i + 1))");
+            }
+            node = node->next;
+        }
+        if (status) break;
+        BMDLNode_CleanList(&anchor);
+    } while (0);
+    BMDLNode_UNINIT(&anchor);
     BMTest_ENDFUNC(status);
     return status;
 }

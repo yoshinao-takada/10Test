@@ -137,6 +137,16 @@ BMStatus_t BMDLNode_Remove(BMDLNode_pt anchor, BMDLNode_pt toRemove)
     return status;
 }
 
+void BMDLNode_Clean(BMDLNode_pt anchor)
+{
+    BMStatus_t status = BMStatus_SUCCESS;
+    BMDLNode_pt node = NULL;
+    while ((status = BMDLNode_GetNext(anchor, &node)) == BMStatus_SUCCESS)
+    {
+        BMDLNode_SReturn(node);
+    }
+}
+
 #pragma endregion CORE_METHODS
 #pragma region NODE_FINDER
 BMStatus_t BMDLNode_Find(BMDLNode_pt anchor, const void* tofind,
@@ -197,6 +207,7 @@ BMStatus_t BMDLNode_CreateSPool()
             node->data = NULL;
             node->next = node->prev = node;
             node->base.lock = BMLock_INIOBJ;
+            node->base.objtype = BMDLNode_TYPEID;
             if ((status = BMLock_INIT(&node->base.lock)) != BMStatus_SUCCESS)
             {
                 break;
@@ -257,22 +268,49 @@ uint16_t BMDLNode_CountSPool()
 }
 #pragma endregion STATIC_POOL_METHODS
 
-BMStatus_t BMMDList_Add(BMDLNode_pt list, BMDLNode_pt toAdd)
+BMStatus_t BMDLNode_AddSubanchor(BMDLNode_pt list, BMDLNode_pt toAdd)
 {
     BMStatus_t status = BMStatus_SUCCESS;
     BMDLNode_pt newnode = NULL;
     do {
-        if ((status = BMLock_LOCK(&list->base.lock)) != BMStatus_SUCCESS)
-        {
-            break;
-        }
         if ((status = BMDLNode_SGet(&newnode)) != BMStatus_SUCCESS)
         {
             break;
         }
         newnode->data = toAdd;
-        status = BMDLNode_AddNext(list, newnode);
+        status = BMDLNode_AddPrev(list, newnode);
     } while (0);
-    status = MAX(status, BMLock_UNLOCK(&list->base.lock));
     return status;
+}
+
+BMStatus_t BMDLNode_PeekList
+(BMDLNode_pt list, uint16_t index, BMDLNode_pt *toPeek)
+{
+    BMStatus_t status = BMStatus_SUCCESS;
+    *toPeek = list->next;
+    do {
+        for (uint16_t i = 0; i < index; i++)
+        {
+            if (*toPeek == list)
+            { // reach at the end of the list.
+                status = BMStatus_RANGE;
+                break;
+            }
+            *toPeek = (*toPeek)->next;
+        }
+    } while (0);
+    *toPeek = (BMDLNode_pt)(*toPeek)->data;
+    return status;
+}
+
+void BMDLNode_CleanList(BMDLNode_pt anchor)
+{
+    BMStatus_t status = BMStatus_SUCCESS;
+    BMDLNode_pt list = NULL;
+    while ((status = BMDLNode_GetNext(anchor, &list)) == BMStatus_SUCCESS)
+    {
+        BMDLNode_Clean((BMDLNode_pt)list->data);
+        BMDLNode_SReturn((BMDLNode_pt)list->data);
+        BMDLNode_SReturn(list);
+    }
 }
