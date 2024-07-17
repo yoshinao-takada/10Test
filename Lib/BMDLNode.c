@@ -207,7 +207,7 @@ BMStatus_t BMDLNode_CreateSPool()
             node->data = NULL;
             node->next = node->prev = node;
             node->base.lock = BMLock_INIOBJ;
-            node->base.objtype = BMDLNode_TYPEID;
+            node->base.objtype = BMDLNodeSPool_TYPEID;
             if ((status = BMLock_INIT(&node->base.lock)) != BMStatus_SUCCESS)
             {
                 break;
@@ -250,11 +250,17 @@ BMStatus_t BMDLNode_SReturn(BMDLNode_pt node)
 {
     BMStatus_t status = BMStatus_SUCCESS;
     do {
+        // Check if the node is a member of the static pool.
+        if (node->base.objtype != BMDLNodeSPool_TYPEID) break;
+
+        // Check if the node is correctly isolated.
         if ((node != node->next) || (node != node->prev))
         { // node is not correctly isolated.
             status = BMStatus_INVALID;
             break;
         }
+
+        // Register the node in the static pool.
         status = BMDLNode_AddNext(&spool, node);
     } while (0);
     return status;

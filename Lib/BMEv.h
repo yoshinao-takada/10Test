@@ -7,9 +7,22 @@ typedef struct {
     BMObj_t base;
     BMID_t evid;
     BMObj_cpt sender; // sender object
-    BMObj_cpt listener; // listener object
     uint16_t refctr; // reference counter of multi-listeners
+    void* data; // any data can be carried by an event.
 } BMEv_t, *BMEv_pt;
+
+#define BMEv_INIOBJ(_evid, _sender, _data) { \
+    BMObj_INIOBJEX(BMEv_TYPEID), _evid, _sender, 0, _data }
+/*!
+\brief Set data to uint16_t immediate value.
+*/
+#define BMEv_SETUINT16(_varptr, _u16data) \
+    (_varptr)->data = (void*)(uint64_t)(_u16data)
+
+/*!
+\brief Retrieve uint16 value casted from data.
+*/
+#define BMEv_GETUINT16(_varptr) (uint16_t)(uint64_t)((_varptr)->data)
 
 #define BMEv_ADDREF(_evptr) ( \
     BMLock_LOCK((BMLock_pt)(_evptr)), (_evptr)->refctr++, \

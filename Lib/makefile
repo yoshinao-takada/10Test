@@ -8,9 +8,11 @@ RELEASE_OBJ_DIR = ../Release/o
 DEBUG_TARGET = $(DEBUG_BIN_DIR)/libBMLib.a
 RELEASE_TARGET = $(RELEASE_BIN_DIR)/libBMLib.a
 DEBUG_OBJECTS = $(DEBUG_OBJ_DIR)/BMLock.o $(DEBUG_OBJ_DIR)/BMEv.o \
-	$(DEBUG_OBJ_DIR)/BMDLNode.o $(DEBUG_OBJ_DIR)/BMFSM.o
+	$(DEBUG_OBJ_DIR)/BMDLNode.o $(DEBUG_OBJ_DIR)/BMFSM.o \
+	$(DEBUG_OBJ_DIR)/BMSubtimer.o
 RELEASE_OBJECTS = $(RELEASE_OBJ_DIR)/BMLock.o $(RELEASE_OBJ_DIR)/BMEv.o \
-	$(RELEASE_OBJ_DIR)/BMDLNode.o $(RELEASE_OBJ_DIR)/BMFSM.o
+	$(RELEASE_OBJ_DIR)/BMDLNode.o $(RELEASE_OBJ_DIR)/BMFSM.o \
+	$(RELEASE_OBJ_DIR)/BMSubtimer.o
 
 .PHONY	:	debug
 .PHONY	:	clean_debug
@@ -35,6 +37,10 @@ $(DEBUG_OBJ_DIR)/BMEv.o	:	BMEv.c BMEv.h BMDLNode.h BMLock.h
 	$(CC) $(DEBUG_CC_FLAGS) -o $@ $<
 
 $(DEBUG_OBJ_DIR)/BMFSM.o	:	BMFSM.c BMFSM.h BMEv.h BMDLNode.h BMLock.h
+	mkdir -p $(DEBUG_OBJ_DIR)
+	$(CC) $(DEBUG_CC_FLAGS) -o $@ $<
+
+$(DEBUG_OBJ_DIR)/BMSubtimer.o	:	BMSubtimer.c BMSubtimer.h BMEv.h BMDLNode.h BMLock.h
 	mkdir -p $(DEBUG_OBJ_DIR)
 	$(CC) $(DEBUG_CC_FLAGS) -o $@ $<
 
